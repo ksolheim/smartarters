@@ -1,0 +1,29 @@
+CREATE TABLE artworks (
+    art_id INTEGER PRIMARY KEY,
+    art_title TEXT NOT NULL,
+    artist TEXT NOT NULL,
+    jpg_name TEXT NOT NULL
+);
+
+CREATE TABLE user_rankings (
+    user_id INTEGER,
+    art_id INTEGER,
+    rank INTEGER,
+    PRIMARY KEY (user_id, art_id),
+    FOREIGN KEY (art_id) REFERENCES artworks (art_id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE artwork_status (
+    user_id INTEGER,
+    art_id INTEGER,
+    is_won BOOLEAN DEFAULT 0,
+    PRIMARY KEY (user_id, art_id),
+    FOREIGN KEY (art_id) REFERENCES artworks (art_id),
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+);

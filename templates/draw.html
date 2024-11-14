@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+
+    {% if artworks %}
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto text-center">
+            <h1>Your #1 Ranked Artwork</h1>
+            <div class="card">
+                <img src="{{ url_for('static', filename='images/art/' + artworks[0].art_id|string + '.jpg') }}" 
+                     class="card-img-top" 
+                     alt="{{ artworks[0].art_title }}"
+                     style="max-height: 400px; object-fit: contain;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ artworks[0].art_title }}</h5>
+                    <p class="card-text">By {{ artworks[0].artist }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Mark Artwork as Won</h5>
+                    <form id="markWonForm" class="d-flex gap-2">
+                        <input type="number" 
+                               class="form-control" 
+                               id="artId" 
+                               placeholder="Enter Art ID"
+                               required>
+                        <button type="submit" class="btn btn-primary">Mark as Won</button>
+                    </form>
+                    <div id="statusMessage" class="mt-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <table class="table" id="artworkTable">
+        <thead>
+            <tr>
+                <th class="sortable" data-sort="art-id">Art ID <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="title">Title <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="artist">Artist <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="ranking">Your Ranking <i class="fas fa-sort"></i></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for artwork in artworks %}
+            <tr>
+                <td class="art-id">{{ artwork.art_id }}</td>
+                <td class="title">{{ artwork.art_title }}</td>
+                <td class="artist">{{ artwork.artist }}</td>
+                <td class="ranking">{{ artwork.user_ranking if artwork.user_ranking > 0 else '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add a state tracker for sort direction
+    const sortStates = {};
+    
+    document.querySelectorAll('th.sortable').forEach(headerCell => {
+        const column = headerCell.dataset.sort;
+        sortStates[column] = 'desc'; // Initial state: desc -> asc -> desc
+        
+        headerCell.addEventListener('click', () => {
+            const table = document.getElementById('artworkTable');
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+            
+            // Toggle between asc and desc only
+            sortStates[column] = sortStates[column] === 'asc' ? 'desc' : 'asc';
+            
+            // Update sort indicators
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('asc', 'desc');
+            });
+            headerCell.classList.add(sortStates[column]);
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                const aValue = a.querySelector(`.${column}`).textContent;
+                const bValue = b.querySelector(`.${column}`).textContent;
+                
+                if (column === 'art-id' || column === 'ranking') {
+                    return sortStates[column] === 'asc' ? 
+                        Number(aValue) - Number(bValue) : 
+                        Number(bValue) - Number(aValue);
+                }
+                return sortStates[column] === 'asc' ? 
+                    aValue.localeCompare(bValue) : 
+                    bValue.localeCompare(aValue);
+            });
+            
+            // Reorder the table
+            const tbody = table.querySelector('tbody');
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+
+    // Add form submission handler
+    document.getElementById('markWonForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const artId = document.getElementById('artId').value;
+        const statusMessage = document.getElementById('statusMessage');
+        
+        fetch(`/mark_won/${artId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                statusMessage.className = 'alert alert-success mt-2';
+                statusMessage.textContent = 'Artwork marked as won successfully!';
+                document.getElementById('artId').value = ''; // Clear input
+            } else {
+                throw new Error(data.error || 'Failed to mark artwork');
+            }
+        })
+        .catch(error => {
+            statusMessage.className = 'alert alert-danger mt-2';
+            statusMessage.textContent = `Error: ${error.message}`;
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% block styles %}
+<style>
+.sortable {
+    cursor: pointer;
+}
+.sortable.asc i::before {
+    content: "\f0de";  /* Font Awesome up arrow */
+}
+.sortable.desc i::before {
+    content: "\f0dd";  /* Font Awesome down arrow */
+}
+.card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+.card-img-top {
+    background-color: #f8f9fa;
+    padding: 10px;
+}
+.gap-2 {
+    gap: 0.5rem;
+}
+
+#statusMessage {
+    display: none;
+}
+
+#statusMessage.alert {
+    display: block;
+}
+</style>
+{% endblock %}
+
+{% endblock %}
