@@ -28,6 +28,16 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # If user is already logged in, redirect them
+    if 'user_id' in session:
+        # Get the 'next' parameter or default to rankings page
+        next_page = request.args.get('next')
+        if next_page:
+            # Validate the next parameter to prevent open redirect vulnerabilities
+            if next_page.startswith('/'):
+                return redirect(next_page)
+        return redirect(url_for('rankings'))
+    
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -40,6 +50,13 @@ def login():
         if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
             session['username'] = user['username']
+            
+            # After successful login, redirect to 'next' parameter if it exists
+            next_page = request.args.get('next')
+            if next_page:
+                # Validate the next parameter to prevent open redirect vulnerabilities
+                if next_page.startswith('/'):
+                    return redirect(next_page)
             return redirect(url_for('rankings'))
         
         return render_template('login.html', error='Invalid username or password')
@@ -118,6 +135,7 @@ def draw():
             LEFT JOIN user_rankings ur
                 ON a.art_id = ur.art_id AND ur.user_id = ?
             WHERE ur.rank > 0  -- Only get ranked artworks
+            AND (s.is_won IS NULL OR s.is_won = 0)  -- Only get artworks not marked as won
             ORDER BY ur.rank
             LIMIT 5  -- Get only top 5
         ''', (session['user_id'], session['user_id'])).fetchall()
@@ -127,30 +145,83 @@ def draw():
     finally:
         conn.close()
 
+@app.route('/get_next_artworks', methods=['GET'])
+@login_required
+def get_next_artworks():
+    conn = get_db_connection()
+    try:
+        artworks = conn.execute('''
+            SELECT 
+                a.art_id, 
+                a.art_title,
+                a.artist,
+                COALESCE(s.is_won, 0) as is_won,
+                COALESCE(ur.rank, 0) as user_ranking
+            FROM artworks a 
+            LEFT JOIN artwork_status s 
+                ON a.art_id = s.art_id AND s.user_id = ?
+            LEFT JOIN user_rankings ur
+                ON a.art_id = ur.art_id AND ur.user_id = ?
+            WHERE ur.rank > 0  -- Only get ranked artworks
+            AND (s.is_won IS NULL OR s.is_won = 0)  -- Only get artworks not marked as won
+            ORDER BY ur.rank
+            LIMIT 5  -- Get only top 5
+        ''', (session['user_id'], session['user_id'])).fetchall()
+        
+        artwork_list = [dict(artwork) for artwork in artworks]
+        print("Next artworks:", artwork_list)  # Debug print
+        
+        return jsonify({
+            'success': True,
+            'artworks': artwork_list
+        })
+    except sqlite3.Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+        
 @app.route('/mark_won/<int:art_id>', methods=['POST'])
 @login_required
 def mark_won(art_id):
     conn = get_db_connection()
     try:
-        # Check if a record already exists
-        existing = conn.execute(
-            'SELECT 1 FROM artwork_status WHERE art_id = ? AND user_id = ?', 
-            (art_id, session['user_id'])
-        ).fetchone()
+        # First check if artwork exists and get its details
+        artwork = conn.execute('''
+            SELECT 
+                a.art_id, 
+                a.art_title,
+                a.artist,
+                COALESCE(ur.rank, 0) as user_ranking,
+                s.is_won
+            FROM artworks a 
+            LEFT JOIN user_rankings ur
+                ON a.art_id = ur.art_id AND ur.user_id = ?
+            LEFT JOIN artwork_status s
+                ON a.art_id = s.art_id AND s.user_id = ?
+            WHERE a.art_id = ?
+        ''', (session['user_id'], session['user_id'], art_id)).fetchone()
         
-        if existing:
-            conn.execute(
-                'UPDATE artwork_status SET is_won = 1 WHERE art_id = ? AND user_id = ?',
-                (art_id, session['user_id'])
-            )
-        else:
-            conn.execute(
-                'INSERT INTO artwork_status (art_id, user_id, is_won) VALUES (?, ?, 1)',
-                (art_id, session['user_id'])
-            )
+        if not artwork:
+            return jsonify({'error': 'Artwork not found'}), 404
+
+        if artwork['is_won'] == 1:
+            return jsonify({
+                'success': False,
+                'error': 'This artwork has already been marked as won'
+            }), 400
+
+        # Insert the won status
+        conn.execute('''
+            INSERT OR REPLACE INTO artwork_status (user_id, art_id, is_won) 
+            VALUES (?, ?, 1)
+        ''', (session['user_id'], art_id))
         
         conn.commit()
-        return jsonify({'success': True})
+        
+        return jsonify({
+            'success': True,
+            'artwork': dict(artwork)
+        })
     except sqlite3.Error as e:
         conn.rollback()
         return jsonify({'error': str(e)}), 500
@@ -182,6 +253,7 @@ def update_rankings():
         return jsonify({'status': 'error', 'message': str(e)}), 500
     finally:
         conn.close()
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6001, debug=True)

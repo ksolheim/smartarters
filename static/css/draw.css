@@ -1,0 +1,51 @@
+.sortable {
+    cursor: pointer;
+}
+
+.sortable.asc i::before {
+    content: "\f0de";  /* Font Awesome up arrow */
+}
+
+.sortable.desc i::before {
+    content: "\f0dd";  /* Font Awesome down arrow */
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-img-top {
+    background-color: #f8f9fa;
+    padding: 10px;
+    transition: opacity 0.5s ease;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+#statusMessage {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+#statusMessage.alert {
+    opacity: 1;
+}
+
+.table-success {
+    transition: background-color 0.5s ease;
+}
+
+#artworkTable tbody tr {
+    transition: opacity 0.5s ease;
+}
+
+.fade-out {
+    opacity: 0 !important;
+}
+
+.fade-in {
+    opacity: 1 !important;
+} 

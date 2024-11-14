@@ -1,4 +1,4 @@
-#!/home/altera-admin/smartarters/.venv/bin/python
+#!/home/ksolheim/smartarters/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

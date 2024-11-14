@@ -4,23 +4,7 @@
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<style>
-    .artwork-item {
-        padding: 1rem;
-        background: white;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        margin-bottom: 0.5rem;
-        cursor: move;
-    }
-    .artwork-item:hover {
-        background: #f8f9fa;
-    }
-    .sortable-ghost {
-        opacity: 0.5;
-        background: #e9ecef;
-    }
-</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/rankings.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -28,50 +12,27 @@
     <h2 class="mb-4">Rank Artworks</h2>
     <p class="text-muted">Drag and drop artworks to rank them. Changes are saved automatically.</p>
     
-    <div id="artworkList" class="mb-4">
-        {% for artwork in artworks|sort(attribute='rank') %}
-        <div class="artwork-item" data-id="{{ artwork.art_id }}">
-            <div class="d-flex align-items-center">
-                <div class="me-3">
-                    <span class="rank-number fw-bold">{{ artwork.rank if artwork.rank else loop.index }}</span>
-                </div>
-                <div>
-                    <h5 class="mb-1">{{ artwork.art_title }}</h5>
-                    <small class="text-muted">ID: {{ artwork.art_id }} | {{ artwork.art_title }} - {{ artwork.artist }}</small>
+    <div class="artwork-container">
+        <div id="artworkList">
+            {% for artwork in artworks|sort(attribute='rank') %}
+            <div class="artwork-item" data-id="{{ artwork.art_id }}">
+                <div class="d-flex align-items-center">
+                    <div class="me-3 drag-handle">
+                        <span class="rank-number fw-bold">{{ artwork.rank if artwork.rank else loop.index }}</span>
+                        <i class="fas fa-grip-vertical text-muted ms-2"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">{{ artwork.art_title }}</h5>
+                        <small class="text-muted">ID: {{ artwork.art_id }} | {{ artwork.art_title }} - {{ artwork.artist }}</small>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-    new Sortable(document.getElementById('artworkList'), {
-        animation: 150,
-        autoscroll: true,
-        scrollSensitivity: 80,
-        scrollSpeed: 30,
-        onEnd: function(evt) {
-            const items = [...evt.to.children];
-            const rankings = items.map((item, index) => ({
-                art_id: item.dataset.id,
-                rank: index + 1
-            }));
-
-            fetch('{{ url_for("update_rankings") }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ rankings: rankings })
-            });
-
-            items.forEach((item, index) => {
-                item.querySelector('.rank-number').textContent = index + 1;
-            });
-        }
-    });
-</script>
+<script src="{{ url_for('static', filename='js/rankings.js') }}"></script>
 {% endblock %}

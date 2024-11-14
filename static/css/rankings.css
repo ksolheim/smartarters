@@ -1,0 +1,75 @@
+/* Container for the artwork list */
+.artwork-container {
+    height: 80vh;  /* Fixed height container */
+    overflow-y: auto;  /* Enable vertical scrolling */
+    -webkit-overflow-scrolling: touch;  /* Smooth scrolling on iOS */
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.artwork-item {
+    padding: 1rem;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    cursor: move;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.artwork-item:hover {
+    background: #f8f9fa;
+}
+
+.sortable-ghost {
+    opacity: 0.5;
+    background: #e9ecef;
+}
+
+.sortable-chosen {
+    background: #e9ecef;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.sortable-drag {
+    opacity: 0.9;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}
+
+/* Hide drag handle on desktop */
+.drag-handle .fa-grip-vertical {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .artwork-container {
+        height: 70vh;  /* Slightly smaller on mobile */
+        padding: 0.5rem;
+    }
+    
+    .artwork-item {
+        padding: 0.75rem;
+        margin-bottom: 0.4rem;
+        cursor: default;  /* Remove move cursor from item */
+    }
+    
+    /* Show drag handle on mobile */
+    .drag-handle .fa-grip-vertical {
+        display: inline-block;
+    }
+    
+    /* Only allow dragging from handle on mobile */
+    .artwork-item {
+        cursor: default;  /* Remove move cursor from item */
+    }
+    
+    .drag-handle {
+        cursor: move;  /* Add move cursor to handle */
+        padding: 10px;
+        margin: -10px;
+    }
+} 
