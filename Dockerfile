@@ -14,5 +14,5 @@ COPY . .
 # Expose port 6001 to the outside world
 EXPOSE 6001
 
-# Command to run the application
-CMD ["flask", "run", "--host=0.0.0.0", "--port=6001"]
+# Command to run the application with improved settings
+CMD ["gunicorn", "--workers=4", "--bind=0.0.0.0:6001", "--timeout=120", "--keep-alive=5", "--max-requests=1000", "--max-requests-jitter=50", "--access-logfile=-", "--error-logfile=-", "wsgi:app"]
