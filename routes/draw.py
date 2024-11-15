@@ -57,8 +57,7 @@ def get_next_artworks():
         ''', (session['user_id'], session['user_id'])).fetchall()
         
         artwork_list = [dict(artwork) for artwork in artworks]
-        print("Next artworks:", artwork_list)  # Debug print
-        
+
         return jsonify({
             'success': True,
             'artworks': artwork_list
