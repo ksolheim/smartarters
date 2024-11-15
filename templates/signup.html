@@ -22,7 +22,7 @@
                     {% if error %}
                     <div class="alert alert-danger">{{ error }}</div>
                     {% endif %}
-                    <form method="POST" action="{{ url_for('signup') }}" class="auth-form">
+                    <form method="POST" action="{{ url_for('auth.signup') }}" class="auth-form">
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" class="form-control" id="username" name="username" required>
@@ -38,7 +38,7 @@
                         <button type="submit" class="btn btn-primary w-100">Sign Up</button>
                     </form>
                     <p class="text-center mt-4">
-                        Already have an account? <a href="{{ url_for('login') }}" class="auth-link">Login</a>
+                        Already have an account? <a href="{{ url_for('auth.login') }}" class="auth-link">Login</a>
                     </p>
                 </div>
             </div>

@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const artId = this.dataset.artId;
             if (confirm('Are you sure you want to undo the won status for this artwork?')) {
-                fetch(`/undo_won/${artId}`, {
+                fetch(`/history/undo_won/${artId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
