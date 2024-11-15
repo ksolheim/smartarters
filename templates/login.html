@@ -26,6 +26,9 @@
                             {% endfor %}
                         {% endif %}
                     {% endwith %}
+                    {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                    {% endif %}
                     <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>

@@ -72,6 +72,8 @@ def signup():
         # Send welcome email after successful registration
         send_welcome_email(email, name)
         
+        # Flash message and redirect to login
+        flash(f'Registration successful! Please check your email ({email}) to complete the process.', 'success')
         return redirect(url_for('auth.login'))
     
     return render_template('signup.html')
