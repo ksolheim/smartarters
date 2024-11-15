@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         rankingTitle.textContent = `Your #${data.artworks[0].user_ranking} Ranked Artwork`;
                                         artworkImage.src = `/static/images/art/${data.artworks[0].art_id}.jpg`;
                                         artworkImage.alt = data.artworks[0].art_title;
+                                        artworkImage.setAttribute('data-bs-target', `#imageModal${data.artworks[0].art_id}`);
                                         artworkTitle.textContent = data.artworks[0].art_title;
                                         artworkArtist.textContent = `By ${data.artworks[0].artist}`;
                                         
@@ -140,11 +141,52 @@ document.addEventListener('DOMContentLoaded', function() {
                                     const tr = document.createElement('tr');
                                     tr.innerHTML = `
                                         <td class="art-id">${artwork.art_id}</td>
-                                        <td class="title">${artwork.art_title}</td>
+                                        <td class="title">
+                                            <span style="cursor: pointer;" 
+                                                  data-bs-toggle="modal" 
+                                                  data-bs-target="#imageModal${artwork.art_id}">
+                                                ${artwork.art_title}
+                                            </span>
+                                        </td>
                                         <td class="artist">${artwork.artist}</td>
                                         <td class="ranking">${artwork.user_ranking > 0 ? artwork.user_ranking : '-'}</td>
                                     `;
                                     tbody.appendChild(tr);
+
+                                    // Create or update the modal for this artwork
+                                    let modal = document.getElementById(`imageModal${artwork.art_id}`);
+                                    if (!modal) {
+                                        modal = document.createElement('div');
+                                        modal.id = `imageModal${artwork.art_id}`;
+                                        modal.className = 'modal fade';
+                                        modal.setAttribute('tabindex', '-1');
+                                        modal.setAttribute('aria-labelledby', `imageModalLabel${artwork.art_id}`);
+                                        modal.setAttribute('aria-hidden', 'true');
+                                        modal.innerHTML = `
+                                            <div class="modal-dialog modal-fullscreen">
+                                                <div class="modal-content bg-dark">
+                                                    <div class="modal-body p-0 d-flex align-items-center justify-content-center" 
+                                                         style="min-height: 100vh;"
+                                                         data-bs-dismiss="modal">
+                                                        <div class="position-relative" style="max-height: 95vh; max-width: 95vw;">
+                                                            <button type="button" 
+                                                                    class="btn-close btn-close-white position-absolute top-0 end-0 m-3" 
+                                                                    data-bs-dismiss="modal" 
+                                                                    aria-label="Close"
+                                                                    style="z-index: 1050;">
+                                                            </button>
+                                                            <img src="/static/images/art/${artwork.art_id}.jpg"
+                                                                 class="img-fluid"
+                                                                 style="max-height: 95vh; max-width: 95vw; object-fit: contain;"
+                                                                 alt="${artwork.art_title}"
+                                                                 onclick="event.stopPropagation();">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                        document.body.appendChild(modal);
+                                    }
                                 });
                             }
                         })

@@ -15,7 +15,9 @@
                 <img src="{{ url_for('static', filename='images/art/' + artworks[0].art_id|string + '.jpg') }}" 
                      class="card-img-top" 
                      alt="{{ artworks[0].art_title }}"
-                     style="max-height: 400px; object-fit: contain;">
+                     style="max-height: 400px; object-fit: contain; cursor: pointer;"
+                     data-bs-toggle="modal" 
+                     data-bs-target="#imageModal{{ artworks[0].art_id }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ artworks[0].art_title }}</h5>
                     <p class="card-text">By {{ artworks[0].artist }}</p>
@@ -57,13 +59,45 @@
             {% for artwork in artworks %}
             <tr>
                 <td class="art-id">{{ artwork.art_id }}</td>
-                <td class="title">{{ artwork.art_title }}</td>
+                <td class="title">
+                    <span style="cursor: pointer;" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#imageModal{{ artwork.art_id }}">
+                        {{ artwork.art_title }}
+                    </span>
+                </td>
                 <td class="artist">{{ artwork.artist }}</td>
                 <td class="ranking">{{ artwork.user_ranking if artwork.user_ranking > 0 else '-' }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    {% for artwork in artworks %}
+    <div class="modal fade" id="imageModal{{ artwork.art_id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ artwork.art_id }}" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content bg-dark">
+                <div class="modal-body p-0 d-flex align-items-center justify-content-center" 
+                     style="min-height: 100vh;"
+                     data-bs-dismiss="modal">
+                    <div class="position-relative" style="max-height: 95vh; max-width: 95vw;">
+                        <button type="button" 
+                                class="btn-close btn-close-white position-absolute top-0 end-0 m-3" 
+                                data-bs-dismiss="modal" 
+                                aria-label="Close"
+                                style="z-index: 1050;">
+                        </button>
+                        <img src="{{ url_for('static', filename='images/art/' + artwork.art_id|string + '.jpg') }}"
+                             class="img-fluid"
+                             style="max-height: 95vh; max-width: 95vw; object-fit: contain;"
+                             alt="{{ artwork.art_title }}"
+                             onclick="event.stopPropagation();">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 
 {% block scripts %}
