@@ -19,7 +19,13 @@
                 {% for artwork in artworks %}
                 <tr>
                     <td>{{ artwork.art_id }}</td>
-                    <td>{{ artwork.art_title }}</td>
+                    <td>
+                        <span style="cursor: pointer;" 
+                              data-bs-toggle="modal" 
+                              data-bs-target="#imageModal{{ artwork.art_id }}">
+                            {{ artwork.art_title }}
+                        </span>
+                    </td>
                     <td>{{ artwork.artist }}</td>
                     <td>
                         <span class="badge {% if artwork.is_won %}bg-success{% else %}bg-secondary{% endif %}">
@@ -41,6 +47,33 @@
         </table>
     </div>
 </div>
+
+<!-- Add this before the closing content block -->
+{% for artwork in artworks %}
+<div class="modal fade" id="imageModal{{ artwork.art_id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ artwork.art_id }}" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-dark">
+            <div class="modal-body p-0 d-flex align-items-center justify-content-center" 
+                 style="min-height: 100vh;"
+                 data-bs-dismiss="modal">
+                <div class="position-relative" style="max-height: 95vh; max-width: 95vw;">
+                    <button type="button" 
+                            class="btn-close btn-close-white position-absolute top-0 end-0 m-3" 
+                            data-bs-dismiss="modal" 
+                            aria-label="Close"
+                            style="z-index: 1050;">
+                    </button>
+                    <img data-src="{{ url_for('static', filename='images/art/' + artwork.art_id|string + '.jpg') }}"
+                         class="img-fluid modal-artwork"
+                         style="max-height: 95vh; max-width: 95vw; object-fit: contain;"
+                         alt="{{ artwork.art_title }}"
+                         onclick="event.stopPropagation();">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}
 
 {% block scripts %}
@@ -68,6 +101,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Error:', error);
                     alert('Error updating status');
                 });
+            }
+        });
+    });
+
+    // Add lazy loading for modal images
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', function () {
+            const img = this.querySelector('.modal-artwork');
+            if (img && img.dataset.src) {
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
             }
         });
     });
