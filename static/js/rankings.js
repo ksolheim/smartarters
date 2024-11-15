@@ -40,4 +40,15 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    // Add lazy loading for modal images
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', function () {
+            const img = this.querySelector('.modal-artwork');
+            if (img && img.dataset.src) {
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
+            }
+        });
+    });
 }); 

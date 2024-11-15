@@ -22,7 +22,13 @@
                         <i class="fas fa-grip-vertical text-muted ms-2"></i>
                     </div>
                     <div>
-                        <h5 class="mb-1">{{ artwork.art_title }}</h5>
+                        <h5 class="mb-1">
+                            <span style="cursor: pointer;" 
+                                  data-bs-toggle="modal" 
+                                  data-bs-target="#imageModal{{ artwork.art_id }}">
+                                {{ artwork.art_title }}
+                            </span>
+                        </h5>
                         <small class="text-muted">ID: {{ artwork.art_id }} | {{ artwork.art_title }} - {{ artwork.artist }}</small>
                     </div>
                 </div>
@@ -31,6 +37,32 @@
         </div>
     </div>
 </div>
+
+{% for artwork in artworks %}
+<div class="modal fade" id="imageModal{{ artwork.art_id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ artwork.art_id }}" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-dark">
+            <div class="modal-body p-0 d-flex align-items-center justify-content-center" 
+                 style="min-height: 100vh;"
+                 data-bs-dismiss="modal">
+                <div class="position-relative" style="max-height: 95vh; max-width: 95vw;">
+                    <button type="button" 
+                            class="btn-close btn-close-white position-absolute top-0 end-0 m-3" 
+                            data-bs-dismiss="modal" 
+                            aria-label="Close"
+                            style="z-index: 1050;">
+                    </button>
+                    <img data-src="{{ url_for('static', filename='images/art/' + artwork.art_id|string + '.jpg') }}"
+                         class="img-fluid modal-artwork"
+                         style="max-height: 95vh; max-width: 95vw; object-fit: contain;"
+                         alt="{{ artwork.art_title }}"
+                         onclick="event.stopPropagation();">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}
 
 {% block extra_scripts %}
