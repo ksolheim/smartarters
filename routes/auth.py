@@ -3,7 +3,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from database.db import get_db_connection
 from utils.email_utils import send_reset_email, get_serializer, send_welcome_email
-from datetime import datetime, timedelta
 
 auth_bp = Blueprint('auth', __name__)
 
