@@ -254,6 +254,48 @@ def update_rankings():
     finally:
         conn.close()
 
+@app.route('/history')
+@login_required
+def history():
+    conn = get_db_connection()
+    try:
+        artworks = conn.execute('''
+            SELECT 
+                a.art_id, 
+                a.art_title,
+                a.artist,
+                a.jpg_name,
+                COALESCE(s.is_won, 0) as is_won,
+                COALESCE(ur.rank, 0) as user_ranking
+            FROM artworks a 
+            LEFT JOIN artwork_status s 
+                ON a.art_id = s.art_id AND s.user_id = ?
+            LEFT JOIN user_rankings ur
+                ON a.art_id = ur.art_id AND ur.user_id = ?
+            ORDER BY a.art_id ASC
+        ''', (session['user_id'], session['user_id'])).fetchall()
+        return render_template('history.html', artworks=artworks)
+    except sqlite3.Error as e:
+        return f"Database error: {str(e)}", 500
+    finally:
+        conn.close()
+
+@app.route('/undo_won/<int:art_id>', methods=['POST'])
+@login_required
+def undo_won(art_id):
+    conn = get_db_connection()
+    try:
+        conn.execute('''
+            DELETE FROM artwork_status 
+            WHERE user_id = ? AND art_id = ?
+        ''', (session['user_id'], art_id))
+        conn.commit()
+        return jsonify({'success': True})
+    except sqlite3.Error as e:
+        conn.rollback()
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6001, debug=True)
