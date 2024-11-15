@@ -22,8 +22,11 @@ CREATE TABLE artwork_status (
     FOREIGN KEY (art_id) REFERENCES artworks (art_id),
     FOREIGN KEY (user_id) REFERENCES users (id)
 );
+
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    reset_token_used INTEGER DEFAULT 0
 );

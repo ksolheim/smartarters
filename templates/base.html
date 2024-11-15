@@ -39,7 +39,7 @@
                 <ul class="navbar-nav ms-auto">
                     {% if session.get('user_id') %}
                         <li class="nav-item order-lg-1 order-2">
-                            <span class="nav-link text-white-50 small">{{ session.get('username') }}</span>
+                            <span class="nav-link text-white-50 small">{{ session.get('name') }}</span>
                         </li>
                         <li class="nav-item order-lg-2 order-1">
                             <a class="nav-link text-danger small" href="{{ url_for('auth.logout') }}">Logout</a>

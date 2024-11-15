@@ -24,31 +24,31 @@ def login():
         return redirect(url_for('rankings.rankings'))
     
     if request.method == 'POST':
-        username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
         
         conn = get_db_connection()
-        user = conn.execute('SELECT * FROM users WHERE username = ?', 
-                          (username,)).fetchone()
+        user = conn.execute('SELECT * FROM users WHERE email = ?', 
+                          (email,)).fetchone()
         conn.close()
         
         if user and check_password_hash(user['password'], password):
             session['user_id'] = user['id']
-            session['username'] = user['username']
+            session['name'] = user['name']
             
             next_page = request.args.get('next')
             if next_page and next_page.startswith('/'):
                 return redirect(next_page)
             return redirect(url_for('rankings.rankings'))
         
-        return render_template('login.html', error='Invalid username or password')
+        return render_template('login.html', error='Invalid email or password')
     
     return render_template('login.html')
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        username = request.form['username']
+        name = request.form['name']
         email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
@@ -58,24 +58,19 @@ def signup():
         
         conn = get_db_connection()
         
-        if conn.execute('SELECT id FROM users WHERE username = ?', 
-                       (username,)).fetchone():
-            conn.close()
-            return render_template('signup.html', error='Username already exists')
-            
         if conn.execute('SELECT id FROM users WHERE email = ?', 
                        (email,)).fetchone():
             conn.close()
             return render_template('signup.html', error='Email already registered')
         
         hashed_password = generate_password_hash(password)
-        conn.execute('INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
-                    (username, email, hashed_password))
+        conn.execute('INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+                    (name, email, hashed_password))
         conn.commit()
         conn.close()
         
         # Send welcome email after successful registration
-        send_welcome_email(email, username)
+        send_welcome_email(email, name)
         
         return redirect(url_for('auth.login'))
     

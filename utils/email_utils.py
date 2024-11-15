@@ -54,7 +54,7 @@ If you did not make this request, please ignore this email.'''
     '''
     mail.send(msg)
 
-def send_welcome_email(user_email, username):
+def send_welcome_email(user_email, name):
     msg = Message(
         'Welcome to SmartArters!',
         sender=os.getenv('MAIL_DEFAULT_SENDER'),
@@ -62,7 +62,7 @@ def send_welcome_email(user_email, username):
     )
     
     # Plain text version
-    msg.body = f'''Welcome to SmartArters, {username}!
+    msg.body = f'''Welcome to SmartArters, {name}!
 
 Thank you for choosing SmartArters. We're excited to have you on board.
 
@@ -78,7 +78,7 @@ The SmartArters Team'''
         <h1 style="color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Welcome to SmartArters!</h1>
         
         <div style="color: #34495e; line-height: 1.6; margin: 20px 0;">
-            <p style="margin: 10px 0;">Dear {username},</p>
+            <p style="margin: 10px 0;">Dear {name},</p>
             
             <p style="margin: 10px 0;">Thank you for joining SmartArters. We're excited to have you on board.</p>
             
@@ -87,6 +87,8 @@ The SmartArters Team'''
             <p style="margin: 10px 0;">At the draw you will be able to relax and enjoy drinks with your friends, instead of worrying about keeping track of your rankings on paper.</p>
             
             <p style="margin: 10px 0; color: #3498db;">Here's to digitalizing the Altera art club! 🍻</p>
+
+            <p style="margin: 10px 0;">You can login at <a href="{url_for('auth.login', _external=True)}">{url_for('auth.login', _external=True)}</a>.</p>
         </div>
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
