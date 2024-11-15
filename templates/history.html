@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Artwork History</h2>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Artist</th>
+                    <th>Status</th>
+                    <th>Rank</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for artwork in artworks %}
+                <tr>
+                    <td>{{ artwork.art_id }}</td>
+                    <td>{{ artwork.art_title }}</td>
+                    <td>{{ artwork.artist }}</td>
+                    <td>
+                        <span class="badge {% if artwork.is_won %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ 'Won' if artwork.is_won else 'Pending' }}
+                        </span>
+                    </td>
+                    <td>{{ artwork.user_ranking if artwork.user_ranking > 0 else 'Unranked' }}</td>
+                    <td>
+                        {% if artwork.is_won %}
+                        <button class="btn btn-sm btn-outline-danger undo-won" 
+                                data-art-id="{{ artwork.art_id }}">
+                            Undo Won
+                        </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.undo-won').forEach(button => {
+        button.addEventListener('click', function() {
+            const artId = this.dataset.artId;
+            if (confirm('Are you sure you want to undo the won status for this artwork?')) {
+                fetch(`/undo_won/${artId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert('Error updating status');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating status');
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 
