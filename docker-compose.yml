@@ -1,0 +1,15 @@
+services:
+  smartarters:
+    image: ghcr.io/ksolheim/smartarters:latest
+    container_name: smartarters-container
+    ports:
+      - "6001:6001"
+    volumes:
+      - smartarters_db:/app/database
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  smartarters_db:
+    name: smartarters_db 
