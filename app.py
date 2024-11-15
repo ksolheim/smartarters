@@ -1,4 +1,5 @@
 from flask import Flask
+from dotenv import load_dotenv
 import os
 from routes.auth import auth_bp
 from routes.rankings import rankings_bp
@@ -7,13 +8,15 @@ from routes.history import history_bp
 from routes.main import main_bp
 from utils.email_utils import mail
 
+load_dotenv()  # Load environment variables from .env file
+
 app = Flask(__name__)
-app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'dev-key-please-change')
+app.secret_key = os.getenv('APP_SECRET_KEY', 'dev-key-please-change')
 
 app.config.update(
     MAIL_SERVER = os.getenv('MAIL_SERVER'),
     MAIL_PORT = int(os.getenv('MAIL_PORT', 587)),
-    MAIL_USE_TLS = True,
+    MAIL_USE_TLS = False,
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
 )
 

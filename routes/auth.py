@@ -96,8 +96,7 @@ def forgot_password():
             conn.commit()
             conn.close()
             
-            # Generate token and send email
-            token = get_serializer().dumps(email, salt='password-reset-salt')
+            # Send password reset email
             send_reset_email(email)
             
             flash('Password reset instructions have been sent to your email.', 'info')
