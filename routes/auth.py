@@ -11,6 +11,18 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('auth.login'))
+        
+        # Check if the user still exists in the database
+        conn = get_db_connection()
+        user = conn.execute('SELECT id FROM users WHERE id = ?', 
+                            (session['user_id'],)).fetchone()
+        conn.close()
+        
+        if not user:
+            session.clear()  # Clear the session if the user does not exist
+            flash('Your session has expired. Please log in again.', 'error')
+            return redirect(url_for('auth.login'))
+        
         return f(*args, **kwargs)
     return decorated_function
 
