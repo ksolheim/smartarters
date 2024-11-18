@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
     
     new Sortable(document.getElementById('artworkList'), {
         animation: 150,
@@ -7,13 +8,14 @@ document.addEventListener('DOMContentLoaded', function() {
         delayOnTouchOnly: true,
         delay: 150,
         
-        // Scroll settings
+        // Enhanced scroll settings for Firefox
         autoscroll: true,
-        scrollSensitivity: 80,
-        scrollSpeed: 30,
+        scrollSensitivity: isFirefox ? 150 : 80,  // Increased sensitivity for Firefox
+        scrollSpeed: isFirefox ? 50 : 30,         // Increased speed for Firefox
+        forceFallback: isFirefox && isMobile,     // Force fallback mode on Firefox mobile
         
-        // Touch handling
-        touchStartThreshold: 5,
+        // Reduced touch threshold for better response
+        touchStartThreshold: isFirefox ? 3 : 5,
         
         // Visual feedback
         chosenClass: 'sortable-chosen',
