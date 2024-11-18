@@ -1,9 +1,10 @@
 # Server socket configuration
 bind = ['0.0.0.0:6001']
-certfile = '/certs/cert.pem'
-keyfile = '/certs/key.pem'
-ca_certs = '/certs/ca.pem'
-ssl_version = 'TLS'
+
+# SSL Configuration
+certfile = '/app/certs/cert.pem'
+keyfile = '/app/certs/key.pem'
+ca_certs = '/app/certs/ca.pem'
 
 # Worker processes
 workers = 4
