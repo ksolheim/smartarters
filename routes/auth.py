@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from database.db import get_db_connection
 from utils.email_utils import send_reset_email, get_serializer, send_welcome_email
+from itsdangerous import URLSafeTimedSerializer
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -44,6 +45,11 @@ def login():
         conn.close()
         
         if user and check_password_hash(user['password'], password):
+            # Check if email is verified
+            if not user['is_verified']:
+                flash('Please verify your email before logging in.', 'error')
+                return render_template('login.html')
+                
             session['user_id'] = user['id']
             session['name'] = user['name']
             
@@ -75,16 +81,17 @@ def signup():
             return render_template('signup.html', error='Email already registered')
         
         hashed_password = generate_password_hash(password)
-        conn.execute('INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
+        # Add is_verified column defaulting to 0
+        conn.execute('''INSERT INTO users (name, email, password, is_verified) 
+                       VALUES (?, ?, ?, 0)''',
                     (name, email, hashed_password))
         conn.commit()
         conn.close()
         
-        # Send welcome email after successful registration
+        # Send welcome email with verification link
         send_welcome_email(email, name)
         
-        # Flash message and redirect to login
-        flash(f'Registration successful! Please check your email ({email}) to complete the process.', 'success')
+        flash('Please check your email to verify your account before logging in.', 'info')
         return redirect(url_for('auth.login'))
     
     return render_template('signup.html')
@@ -166,3 +173,33 @@ def reset_password(token):
         return redirect(url_for('auth.login'))
         
     return render_template('reset_password.html')
+
+@auth_bp.route('/verify/<token>')
+def verify_email(token):
+    try:
+        # Create serializer with explicit configuration
+        serializer = URLSafeTimedSerializer(current_app.secret_key)
+        email = serializer.loads(token, salt='email-verify-salt', max_age=86400)
+        
+        conn = get_db_connection()
+        user = conn.execute('SELECT id, is_verified FROM users WHERE email = ?', 
+                          (email,)).fetchone()
+        
+        if not user:
+            flash('Invalid verification link.', 'error')
+            return redirect(url_for('auth.login'))
+            
+        if user['is_verified']:
+            flash('Email already verified. Please login.', 'info')
+            return redirect(url_for('auth.login'))
+            
+        conn.execute('UPDATE users SET is_verified = 1 WHERE email = ?', (email,))
+        conn.commit()
+        conn.close()
+        
+        flash('Email verified successfully! You can now login.', 'success')
+        return redirect(url_for('auth.login'))
+        
+    except:
+        flash('The verification link is invalid or has expired.', 'error')
+        return redirect(url_for('auth.login'))

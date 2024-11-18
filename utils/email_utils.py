@@ -9,8 +9,6 @@ def get_serializer():
     return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
 
 def send_reset_email(user_email):
-    # The token generation is already handled inside the function,
-    # so we don't need it as a parameter
     token = get_serializer().dumps(user_email, salt='password-reset-salt')
     reset_url = url_for('auth.reset_password', token=token, _external=True)
     msg = Message(
@@ -54,11 +52,14 @@ If you did not make this request, please ignore this email.'''
     '''
     mail.send(msg)
 
-def send_welcome_email(user_email, name):
+def send_welcome_email(email, name):
+    token = get_serializer().dumps(email, salt='email-verify-salt')
+    verification_url = url_for('auth.verify_email', token=token, _external=True)
+    
     msg = Message(
         'Welcome to SmartArters!',
         sender=os.getenv('MAIL_DEFAULT_SENDER'),
-        recipients=[user_email]
+        recipients=[email]
     )
     
     # Plain text version
@@ -66,8 +67,10 @@ def send_welcome_email(user_email, name):
 
 Thank you for choosing SmartArters. We're excited to have you on board.
 
-You can now log in to your account and start ranking your favorite artworks.
 At the draw you will be able to relax and enjoy drinks with your friends, instead of worrying about keeping track of your rankings on paper.
+Click the link below to verify your email and start ranking your favorite artworks.
+
+{verification_url}
 
 Best regards,
 The SmartArters Team'''
@@ -82,13 +85,13 @@ The SmartArters Team'''
             
             <p style="margin: 10px 0;">Thank you for joining SmartArters. We're excited to have you on board.</p>
             
-            <p style="margin: 10px 0;">You can now log in to your account and start ranking your favorite artworks.</p>
-            
             <p style="margin: 10px 0;">At the draw you will be able to relax and enjoy drinks with your friends, instead of worrying about keeping track of your rankings on paper.</p>
             
-            <p style="margin: 10px 0; color: #3498db;">Here's to digitalizing the Altera art club! 🍻</p>
+            <p style="margin: 10px 0;">Click the link below to verify your email and start ranking your favorite artworks.</p>
+            
+            <p style="margin: 10px 0;">Verification link: <a href="{verification_url}">{verification_url}</a>.</p>
 
-            <p style="margin: 10px 0;">You can login at <a href="{url_for('auth.login', _external=True)}">{url_for('auth.login', _external=True)}</a>.</p>
+            <p style="margin: 10px 0; color: #3498db;">Here's to digitalizing the Altera art club! 🍻</p>
         </div>
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">

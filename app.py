@@ -11,7 +11,7 @@ from utils.email_utils import mail
 load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
-app.secret_key = os.getenv('APP_SECRET_KEY', 'dev-key-please-change').encode('ascii', 'ignore').decode('ascii')
+app.secret_key = os.getenv('APP_SECRET_KEY', 'dev-key-please-change')
 
 app.config.update(
     MAIL_SERVER = os.getenv('MAIL_SERVER'),
