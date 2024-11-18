@@ -51,7 +51,7 @@ def login():
         if user and check_password_hash(user['password'], password):
             # Check if email is verified
             if not user['is_verified']:
-                flash('Please verify your email before logging in.', 'error')
+                flash('Please verify your email before logging in.', 'info')
                 return render_template('login.html')
 
             session['user_id'] = user['id']
