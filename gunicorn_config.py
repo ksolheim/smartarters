@@ -1,25 +1,20 @@
 # Server socket configuration
-BIND = '0.0.0.0:6001'
-CERTFILE = '/certs/cert.pem'
-KEYFILE = '/certs/key.pem'
-CA_CERTS = '/certs/ca.pem'
+bind = ['0.0.0.0:6001']
+certfile = '/certs/cert.pem'
+keyfile = '/certs/key.pem'
+ca_certs = '/certs/ca.pem'
+ssl_version = 'TLS'
 
 # Worker processes
-WORKERS = 4
-TIMEOUT = 120
-KEEPALIVE = 5
+workers = 4
+timeout = 120
+keepalive = 5
 
 # Request handling
-MAX_REQUESTS = 1000
-MAX_REQUESTS_JITTER = 50
+max_requests = 1000
+max_requests_jitter = 50
 
 # Logging
-ACCESSLOG = '-'
-ERRORLOG = '-'
-LOGLEVEL = 'info'
-
-# SSL Configuration
-SSL_VERSION = 'TLS'
-# Uncomment and modify these if needed:
-# CIPHERS = 'TLSv1'
-# CERT_REQS = 2  # ssl.CERT_REQUIRED 
+accesslog = '-'
+errorlog = '-'
+loglevel = 'info'
