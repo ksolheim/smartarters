@@ -28,5 +28,6 @@ CREATE TABLE users (
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    reset_token_used INTEGER DEFAULT 0
+    reset_token_used INTEGER DEFAULT 0,
+    is_verified INTEGER DEFAULT 0
 );

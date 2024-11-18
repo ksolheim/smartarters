@@ -155,6 +155,9 @@ def reset_password(token):
     except (BadSignature, SignatureExpired):
         flash('The password reset link is invalid or has expired.', 'error')
         return redirect(url_for('auth.forgot_password'))
+    except Exception:
+        flash('An error occured while processing your request. Please try again.', 'error')
+        return redirect(url_for('auth.login'))
 
     # Clear any existing flash messages when showing the reset form
     session.pop('_flashes', None)
@@ -210,4 +213,7 @@ def verify_email(token):
 
     except (BadSignature, SignatureExpired):
         flash('The verification link is invalid or has expired.', 'error')
+        return redirect(url_for('auth.login'))
+    except Exception:
+        flash('An error occured while processing your request. Please try again.', 'error')
         return redirect(url_for('auth.login'))
