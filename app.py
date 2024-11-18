@@ -18,7 +18,8 @@ app.config.update(
     MAIL_SERVER = os.getenv('MAIL_SERVER'),
     MAIL_PORT = int(os.getenv('MAIL_PORT', '587')),
     MAIL_USE_TLS = False,
-    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
+    MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER'),
+    SERVER_NAME = os.getenv('SERVER_NAME')
 )
 
 mail.init_app(app)

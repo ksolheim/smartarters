@@ -1,3 +1,5 @@
+import os
+
 # Server socket configuration
 bind = ['0.0.0.0:6001']
 
@@ -5,6 +7,7 @@ bind = ['0.0.0.0:6001']
 certfile = '/app/certs/cert.pem'
 keyfile = '/app/certs/key.pem'
 ca_certs = '/app/certs/ca.pem'
+server_name = os.getenv('SERVER_NAME')
 
 # Worker processes
 workers = 4
