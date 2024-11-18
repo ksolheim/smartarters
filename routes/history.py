@@ -1,13 +1,14 @@
-from flask import Blueprint, render_template, request, jsonify, session
+import sqlite3
+from flask import Blueprint, render_template, jsonify, session
 from routes.auth import login_required
 from database.db import get_db_connection
-import sqlite3
 
 history_bp = Blueprint('history', __name__)
 
 @history_bp.route('/history')
 @login_required
 def history():
+    """History route."""
     conn = get_db_connection()
     try:
         artworks = conn.execute('''
@@ -34,6 +35,7 @@ def history():
 @history_bp.route('/history/undo_won/<int:art_id>', methods=['POST'])
 @login_required
 def undo_won(art_id):
+    """Undo won route."""
     conn = get_db_connection()
     try:
         conn.execute('''
@@ -46,4 +48,4 @@ def undo_won(art_id):
         conn.rollback()
         return jsonify({'error': str(e)}), 500
     finally:
-        conn.close() 
+        conn.close()
