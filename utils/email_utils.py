@@ -1,3 +1,4 @@
+"""Email utility functions."""
 import os
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer
@@ -6,9 +7,11 @@ from flask import url_for, current_app
 mail = Mail()
 
 def get_serializer():
+    """Get serializer."""
     return URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
 
 def send_reset_email(user_email):
+    """Send reset email."""
     token = get_serializer().dumps(user_email, salt='password-reset-salt')
     reset_url = url_for('auth.reset_password', token=token, _external=True)
     msg = Message(
@@ -16,7 +19,7 @@ def send_reset_email(user_email):
         sender=os.getenv('MAIL_DEFAULT_SENDER'),
         recipients=[user_email]
     )
-    
+
     # Plain text version
     msg.body = f'''To reset your password, visit the following link:
 
@@ -53,15 +56,16 @@ If you did not make this request, please ignore this email.'''
     mail.send(msg)
 
 def send_welcome_email(email, name):
+    """Send welcome email."""
     token = get_serializer().dumps(email, salt='email-verify-salt')
     verification_url = url_for('auth.verify_email', token=token, _external=True)
-    
+
     msg = Message(
         'Welcome to SmartArters!',
         sender=os.getenv('MAIL_DEFAULT_SENDER'),
         recipients=[email]
     )
-    
+
     # Plain text version
     msg.body = f'''Welcome to SmartArters, {name}!
 
@@ -100,4 +104,4 @@ The SmartArters Team'''
         </div>
     </div>
     '''
-    mail.send(msg) 
+    mail.send(msg)

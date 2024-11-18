@@ -1,6 +1,7 @@
+"""Main application."""
+import os
 from flask import Flask
 from dotenv import load_dotenv
-import os
 from routes.auth import auth_bp
 from routes.rankings import rankings_bp
 from routes.draw import draw_bp
@@ -15,7 +16,7 @@ app.secret_key = os.getenv('APP_SECRET_KEY', 'dev-key-please-change')
 
 app.config.update(
     MAIL_SERVER = os.getenv('MAIL_SERVER'),
-    MAIL_PORT = int(os.getenv('MAIL_PORT', 587)),
+    MAIL_PORT = int(os.getenv('MAIL_PORT', '587')),
     MAIL_USE_TLS = False,
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER')
 )

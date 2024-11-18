@@ -1,13 +1,15 @@
-from flask import Blueprint, render_template, request, jsonify, session
+"""Draw routes."""
+import sqlite3
+from flask import Blueprint, render_template, jsonify, session
 from routes.auth import login_required
 from database.db import get_db_connection
-import sqlite3
 
 draw_bp = Blueprint('draw', __name__)
 
 @draw_bp.route('/draw', methods=['GET'])
 @login_required
 def draw():
+    """Draw route."""
     conn = get_db_connection()
     try:
         artworks = conn.execute('''
@@ -36,6 +38,7 @@ def draw():
 @draw_bp.route('/get_next_artworks', methods=['GET'])
 @login_required
 def get_next_artworks():
+    """Get next artworks route."""
     conn = get_db_connection()
     try:
         artworks = conn.execute('''
@@ -55,7 +58,7 @@ def get_next_artworks():
             ORDER BY ur.rank
             LIMIT 5  -- Get only top 5
         ''', (session['user_id'], session['user_id'])).fetchall()
-        
+
         artwork_list = [dict(artwork) for artwork in artworks]
 
         return jsonify({
@@ -70,6 +73,7 @@ def get_next_artworks():
 @draw_bp.route('/mark_won/<int:art_id>', methods=['POST'])
 @login_required
 def mark_won(art_id):
+    """Mark won route."""
     conn = get_db_connection()
     try:
         artwork = conn.execute('''
@@ -86,7 +90,7 @@ def mark_won(art_id):
                 ON a.art_id = s.art_id AND s.user_id = ?
             WHERE a.art_id = ?
         ''', (session['user_id'], session['user_id'], art_id)).fetchone()
-        
+
         if not artwork:
             return jsonify({'error': 'Artwork not found'}), 404
 
@@ -100,9 +104,9 @@ def mark_won(art_id):
             INSERT OR REPLACE INTO artwork_status (user_id, art_id, is_won) 
             VALUES (?, ?, 1)
         ''', (session['user_id'], art_id))
-        
+
         conn.commit()
-        
+
         return jsonify({
             'success': True,
             'artwork': dict(artwork)
@@ -111,4 +115,4 @@ def mark_won(art_id):
         conn.rollback()
         return jsonify({'error': str(e)}), 500
     finally:
-        conn.close() 
+        conn.close()
