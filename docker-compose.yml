@@ -6,6 +6,7 @@ services:
       - "6001:6001"
     volumes:
       - smartarters_db:/app/database
+      - ./certs:/certs
     env_file:
       - .env
     restart: unless-stopped
