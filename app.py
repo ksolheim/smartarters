@@ -32,4 +32,4 @@ app.register_blueprint(draw_bp)
 app.register_blueprint(history_bp)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=6002, debug=True)
+    app.run(host='0.0.0.0', port=6001, debug=True)
