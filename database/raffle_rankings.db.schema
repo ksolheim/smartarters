@@ -2,7 +2,8 @@ CREATE TABLE artworks (
     art_id INTEGER PRIMARY KEY,
     art_title TEXT NOT NULL,
     artist TEXT NOT NULL,
-    jpg_name TEXT NOT NULL
+    jpg_name TEXT NOT NULL,
+    price INTEGER
 );
 
 CREATE TABLE user_rankings (
