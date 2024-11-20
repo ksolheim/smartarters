@@ -9,27 +9,72 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">Rank Artworks</h2>
-    <p class="text-muted">Drag and drop artworks to rank them. Changes are saved automatically.</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Rank Artworks</h2>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary active" data-view="list">
+                <i class="fas fa-list"></i>
+            </button>
+            <button type="button" class="btn btn-outline-primary" data-view="gallery">
+                <i class="fas fa-th"></i>
+            </button>
+        </div>
+    </div>
     
-    <div class="artwork-container">
-        <div id="artworkList">
-            {% for artwork in artworks|sort(attribute='rank') %}
-            <div class="artwork-item" data-id="{{ artwork.art_id }}">
-                <div class="d-flex align-items-center">
-                    <div class="me-3 drag-handle">
-                        <span class="rank-number fw-bold">{{ artwork.rank if artwork.rank else loop.index }}</span>
-                        <i class="fas fa-grip-vertical text-muted ms-2"></i>
+    <!-- List View -->
+    <div id="listView">
+        <p class="text-muted">Drag and drop artworks to rank them. Changes are saved automatically.</p>
+        <div class="artwork-container">
+            <div id="artworkList">
+                {% for artwork in artworks|sort(attribute='rank') %}
+                <div class="artwork-item" data-id="{{ artwork.art_id }}">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3 drag-handle">
+                            <span class="rank-number fw-bold">{{ artwork.rank if artwork.rank else loop.index }}</span>
+                            <i class="fas fa-grip-vertical text-muted ms-2"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-1">
+                                <span style="cursor: pointer;" 
+                                      data-bs-toggle="modal" 
+                                      data-bs-target="#imageModal{{ artwork.art_id }}">
+                                    {{ artwork.art_title }}
+                                </span>
+                            </h5>
+                            <small class="text-muted">ID: {{ artwork.art_id }} | {{ artwork.art_title }} - {{ artwork.artist }}</small>
+                        </div>
                     </div>
-                    <div>
-                        <h5 class="mb-1">
-                            <span style="cursor: pointer;" 
-                                  data-bs-toggle="modal" 
-                                  data-bs-target="#imageModal{{ artwork.art_id }}">
-                                {{ artwork.art_title }}
-                            </span>
-                        </h5>
-                        <small class="text-muted">ID: {{ artwork.art_id }} | {{ artwork.art_title }} - {{ artwork.artist }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery View -->
+    <div id="galleryView" class="d-none">
+        <p class="text-muted">Enter ranking numbers (1-{{ artworks|length }}) for each artwork. Changes save automatically.</p>
+        <div class="row g-4" id="artworkGrid">
+            {% for artwork in artworks|sort(attribute='rank') %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="card h-100">
+                    <img src="{{ url_for('static', filename='images/art/thumbnails/thumb_' + artwork.art_id|string + '.jpg') }}"
+                         class="card-img-top gallery-img"
+                         alt="{{ artwork.art_title }}"
+                         data-bs-toggle="modal"
+                         data-bs-target="#imageModal{{ artwork.art_id }}">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ artwork.art_title }}</h6>
+                        <p class="card-text small text-muted">{{ artwork.artist }}</p>
+                        <div class="input-group">
+                            <input type="number"
+                                   class="form-control rank-input"
+                                   min="1"
+                                   max="{{ artworks|length }}"
+                                   value="{{ artwork.rank if artwork.rank else '' }}"
+                                   data-art-id="{{ artwork.art_id }}"
+                                   placeholder="Rank"
+                                   autocomplete="off">
+                        </div>
                     </div>
                 </div>
             </div>
