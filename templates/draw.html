@@ -52,6 +52,7 @@
                 <th class="sortable" data-sort="art-id">Art ID <i class="fas fa-sort"></i></th>
                 <th class="sortable" data-sort="title">Title <i class="fas fa-sort"></i></th>
                 <th class="sortable" data-sort="artist">Artist <i class="fas fa-sort"></i></th>
+                <th class="sortable" data-sort="price">Price <i class="fas fa-sort"></i></th>
                 <th class="sortable" data-sort="ranking">Your Ranking <i class="fas fa-sort"></i></th>
             </tr>
         </thead>
@@ -67,6 +68,7 @@
                     </span>
                 </td>
                 <td class="artist">{{ artwork.artist }}</td>
+                <td class="price">{{ "{:,}".format(artwork.price).replace(',', ' ') }} kr</td>
                 <td class="ranking">{{ artwork.user_ranking if artwork.user_ranking > 0 else '-' }}</td>
             </tr>
             {% endfor %}

@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const isMobile = window.matchMedia("(max-width: 768px)").matches;
     const isFirefox = navigator.userAgent.toLowerCase().includes('firefox');
-    
+    // Initialize Sortable.js
     new Sortable(document.getElementById('artworkList'), {
         animation: 150,
         handle: isMobile ? '.drag-handle' : null,

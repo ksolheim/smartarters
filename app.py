@@ -8,6 +8,7 @@ from routes.draw import draw_bp
 from routes.history import history_bp
 from routes.main import main_bp
 from utils.email_utils import mail
+from database.db import init_price_column, update_artwork_prices
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -30,6 +31,10 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(rankings_bp)
 app.register_blueprint(draw_bp)
 app.register_blueprint(history_bp)
+
+# Add after creating the app but before running it
+init_price_column()
+update_artwork_prices('static/art_price.csv')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6001, debug=True)

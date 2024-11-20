@@ -16,6 +16,7 @@ def history():
                 a.art_id, 
                 a.art_title,
                 a.artist,
+                a.price,
                 a.jpg_name,
                 COALESCE(s.is_won, 0) as is_won,
                 COALESCE(ur.rank, 0) as user_ranking

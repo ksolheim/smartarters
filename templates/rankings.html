@@ -41,7 +41,7 @@
                                     {{ artwork.art_title }}
                                 </span>
                             </h5>
-                            <small class="text-muted">ID: {{ artwork.art_id }} | {{ artwork.art_title }} - {{ artwork.artist }}</small>
+                            <small class="text-muted">ID: {{ artwork.art_id }} | {{ artwork.art_title }} - {{ artwork.artist }} | {{ "{:,}".format(artwork.price).replace(',', ' ') }} kr</small>
                         </div>
                     </div>
                 </div>
@@ -64,7 +64,10 @@
                          data-bs-target="#imageModal{{ artwork.art_id }}">
                     <div class="card-body">
                         <h6 class="card-title">{{ artwork.art_title }}</h6>
-                        <p class="card-text small text-muted">{{ artwork.artist }}</p>
+                        <p class="card-text small text-muted d-flex justify-content-between">
+                            <span>{{ artwork.artist }}</span>
+                            <span>{{ "{:,}".format(artwork.price).replace(',', ' ') }} kr</span>
+                        </p>
                         <div class="input-group">
                             <input type="number"
                                    class="form-control rank-input"

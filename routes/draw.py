@@ -17,6 +17,7 @@ def draw():
                 a.art_id, 
                 a.art_title,
                 a.artist,
+                a.price,
                 COALESCE(s.is_won, 0) as is_won,
                 COALESCE(ur.rank, 0) as user_ranking
             FROM artworks a 
@@ -46,6 +47,7 @@ def get_next_artworks():
                 a.art_id, 
                 a.art_title,
                 a.artist,
+                a.price,
                 COALESCE(s.is_won, 0) as is_won,
                 COALESCE(ur.rank, 0) as user_ranking
             FROM artworks a 
@@ -81,6 +83,7 @@ def mark_won(art_id):
                 a.art_id, 
                 a.art_title,
                 a.artist,
+                a.price,
                 COALESCE(ur.rank, 0) as user_ranking,
                 s.is_won
             FROM artworks a 

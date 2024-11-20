@@ -10,6 +10,7 @@
                     <th>ID</th>
                     <th>Title</th>
                     <th>Artist</th>
+                    <th>Price</th>
                     <th>Status</th>
                     <th>Rank</th>
                     <th>Actions</th>
@@ -27,6 +28,7 @@
                         </span>
                     </td>
                     <td>{{ artwork.artist }}</td>
+                    <td>{{ "{:,}".format(artwork.price).replace(',', ' ') }} kr</td>
                     <td>
                         <span class="badge {% if artwork.is_won %}bg-success{% else %}bg-secondary{% endif %}">
                             {{ 'Won' if artwork.is_won else 'Pending' }}
