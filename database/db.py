@@ -31,6 +31,7 @@ def init_price_column():
         if 'price' not in columns:
             conn.execute("ALTER TABLE artworks ADD COLUMN price INTEGER")
             conn.commit()
+            print("Price column added successfully")
     except Exception as e:
         print(f"Error initializing price column: {e}")
     finally:

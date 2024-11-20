@@ -15,6 +15,10 @@ load_dotenv()  # Load environment variables from .env file
 app = Flask(__name__)
 app.secret_key = os.getenv('APP_SECRET_KEY', 'dev-key-please-change')
 
+# Initialize database and update prices
+init_price_column()
+update_artwork_prices('static/art_price.csv')
+
 app.config.update(
     MAIL_SERVER = os.getenv('MAIL_SERVER'),
     MAIL_PORT = int(os.getenv('MAIL_PORT', '587')),
@@ -31,10 +35,6 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(rankings_bp)
 app.register_blueprint(draw_bp)
 app.register_blueprint(history_bp)
-
-# Add after creating the app but before running it
-init_price_column()
-update_artwork_prices('static/art_price.csv')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=6001, debug=True)
