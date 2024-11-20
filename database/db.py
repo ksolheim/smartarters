@@ -4,7 +4,7 @@ import sqlite3
 import csv
 
 # Get database path from environment variable, or use a default path
-DATABASE = os.getenv('DB_PATH', 'database/raffle_rankings.db')
+DATABASE = os.getenv('DB_PATH', '/data/raffle_rankings.db')
 
 def get_db_connection():
     """Get database connection."""
