@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Artwork Statistics{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Most Popular Artworks</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Art ID</th>
+                <th>Title</th>
+                <th>Artist</th>
+                <th>Rank Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for artwork in artworks %}
+            <tr>
+                <td>{{ artwork.art_id }}</td>
+                <td>
+                    <span style="cursor: pointer;" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#imageModal{{ artwork.art_id }}">
+                        {{ artwork.art_title }}
+                    </span>
+                </td>
+                <td>{{ artwork.artist }}</td>
+                <td>{{ artwork.rank_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% for artwork in artworks %}
+    <div class="modal fade" id="imageModal{{ artwork.art_id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ artwork.art_id }}" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content bg-dark">
+                <div class="modal-body p-0 d-flex align-items-center justify-content-center" 
+                     style="min-height: 100vh;"
+                     data-bs-dismiss="modal">
+                    <div class="position-relative" style="max-height: 95vh; max-width: 95vw;">
+                        <button type="button" 
+                                class="btn-close btn-close-white position-absolute top-0 end-0 m-3" 
+                                data-bs-dismiss="modal" 
+                                aria-label="Close"
+                                style="z-index: 1050;">
+                        </button>
+                        <img src="{{ url_for('static', filename='images/art/' + artwork.art_id|string + '.jpg') }}"
+                             class="img-fluid"
+                             style="max-height: 95vh; max-width: 95vw; object-fit: contain;"
+                             alt="{{ artwork.art_title }}"
+                             onclick="event.stopPropagation();">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %} 
