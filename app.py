@@ -7,6 +7,7 @@ from routes.rankings import rankings_bp
 from routes.draw import draw_bp
 from routes.history import history_bp
 from routes.main import main_bp
+from routes.statistics import statistics_bp
 from utils.email_utils import mail
 from database.db import init_price_column, update_artwork_prices
 
@@ -35,6 +36,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(rankings_bp)
 app.register_blueprint(draw_bp)
 app.register_blueprint(history_bp)
+app.register_blueprint(statistics_bp)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=6001, debug=True)
+    app.run(host='0.0.0.0', port=6002, debug=True)

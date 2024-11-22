@@ -163,3 +163,21 @@ body {
     opacity: 1;
     color: var(--bs-danger) !important;
 }
+
+/* Responsive Canvas Styling */
+canvas {
+    /* Ensure canvas fills the width of its container and maintains aspect ratio */
+    width: 100% !important;
+    height: 500px !important; /* Adjust this value as needed for desired chart height */
+}
+
+/* Optional: Adjust card-body to handle larger canvases */
+.card-body {
+    position: relative;
+}
+
+/* Ensuring Modals are Responsive */
+.modal-content img {
+    width: 100%;
+    height: auto;
+}
