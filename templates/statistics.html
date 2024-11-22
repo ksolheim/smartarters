@@ -3,35 +3,82 @@
 {% block title %}Artwork Statistics{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2 class="mb-4">Most Popular Artworks</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Art ID</th>
-                <th>Title</th>
-                <th>Artist</th>
-                <th>Rank Count</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for artwork in artworks %}
-            <tr>
-                <td>{{ artwork.art_id }}</td>
-                <td>
-                    <span style="cursor: pointer;" 
-                          data-bs-toggle="modal" 
-                          data-bs-target="#imageModal{{ artwork.art_id }}">
-                        {{ artwork.art_title }}
-                    </span>
-                </td>
-                <td>{{ artwork.artist }}</td>
-                <td>{{ artwork.rank_count }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
+<div class="container my-4">
+    <h2 class="mb-4">All Artworks Statistics</h2>
+    
+    <!-- Charts Section -->
+    <div class="row">
+        <!-- Average Rank Bar Chart -->
+        <div class="col-12 mb-5">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Average Rank of All Artworks</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="averageRankChart" aria-label="Average Rank Chart" role="img"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Rankings Bar Chart -->
+        <div class="col-12 mb-5">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Top 3 Rankings of All Artworks</h5>
+                </div>
+                <div class="card-body" style="overflow-x: auto;">
+                    <canvas id="topRankingsChart" aria-label="Top Rankings Chart" role="img"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Data Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Artworks Overview</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-responsive">
+                        <thead>
+                            <tr>
+                                <th>Art ID</th>
+                                <th>Title</th>
+                                <th>Artist</th>
+                                <th>Average Rank</th>
+                                <th>First-Place Rankings</th>
+                                <th>Second-Place Rankings</th>
+                                <th>Third-Place Rankings</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for artwork in artworks %}
+                            <tr>
+                                <td>{{ artwork.art_id }}</td>
+                                <td>
+                                    <span style="cursor: pointer;" 
+                                          data-bs-toggle="modal" 
+                                          data-bs-target="#imageModal{{ artwork.art_id }}">
+                                        {{ artwork.art_title }}
+                                    </span>
+                                </td>
+                                <td>{{ artwork.artist }}</td>
+                                <td>{{ average_data[loop.index0] }}</td> <!-- Display whole number average rank -->
+                                <td>{{ artwork.first_place_count }}</td>
+                                <td>{{ artwork.second_place_count }}</td>
+                                <td>{{ artwork.third_place_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Section -->
     {% for artwork in artworks %}
     <div class="modal fade" id="imageModal{{ artwork.art_id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ artwork.art_id }}" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen">
@@ -46,8 +93,8 @@
                                 aria-label="Close"
                                 style="z-index: 1050;">
                         </button>
-                        <img src="{{ url_for('static', filename='images/art/' + artwork.art_id|string + '.jpg') }}"
-                             class="img-fluid"
+                        <img data-src="{{ url_for('static', filename='images/art/' + artwork.art_id|string + '.jpg') }}"
+                             class="img-fluid modal-artwork"
                              style="max-height: 95vh; max-width: 95vw; object-fit: contain;"
                              alt="{{ artwork.art_title }}"
                              onclick="event.stopPropagation();">
@@ -58,4 +105,155 @@
     </div>
     {% endfor %}
 </div>
-{% endblock %} 
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Add lazy loading for modal images
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('show.bs.modal', function () {
+            const img = this.querySelector('.modal-artwork');
+            if (img && img.dataset.src) {
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
+            }
+        });
+    });
+    // Average Rank Chart Configuration
+    const avgCtx = document.getElementById('averageRankChart').getContext('2d');
+    const averageRankChart = new Chart(avgCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ average_labels | tojson }},
+            datasets: [{
+                label: 'Average Rank',
+                data: {{ average_data | tojson }},
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Allow flexibility in height
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Average Rank'
+                    },
+                    ticks: {
+                        precision: 0  // Ensures whole numbers on Y-axis
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Artworks'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Top Rankings Bar Chart Configuration
+    const topCtx = document.getElementById('topRankingsChart').getContext('2d');
+    const topRankingsChart = new Chart(topCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ top_labels | tojson }},
+            datasets: [
+                {
+                    label: 'First Place',
+                    data: {{ first_place | tojson }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Second Place',
+                    data: {{ second_place | tojson }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Third Place',
+                    data: {{ third_place | tojson }},
+                    backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',  // Makes the chart horizontal
+            responsive: true,
+            maintainAspectRatio: false, // Allow flexibility in height
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Rankings'
+                    },
+                    ticks: {
+                        precision: 0  // Ensures whole numbers on X-axis
+                    }
+                },
+                y: {
+                    title: {
+                        display: false,
+                        text: 'Artworks'
+                    },
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            let label = this.getLabelForValue(value);
+                            if (label.length > 25) {  // Adjust character limit as needed
+                                return label.substr(0, 25) + '...';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'All Artworks - First, Second, and Third Place Rankings'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += context.parsed.x;
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
