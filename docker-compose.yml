@@ -5,9 +5,6 @@ services:
     ports:
       - "6001:6001"
     volumes:
-      - type: volume
-        source: smartarters_db
-        target: /data
       - ./certs:/certs
     env_file:
       - .env
