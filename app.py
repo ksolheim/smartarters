@@ -9,16 +9,11 @@ from routes.history import history_bp
 from routes.main import main_bp
 from routes.statistics import statistics_bp
 from utils.email_utils import mail
-from database.db import init_price_column, update_artwork_prices
 
 load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
 app.secret_key = os.getenv('APP_SECRET_KEY', 'dev-key-please-change')
-
-# Initialize database and update prices
-init_price_column()
-update_artwork_prices('static/art_price.csv')
 
 app.config.update(
     MAIL_SERVER = os.getenv('MAIL_SERVER'),

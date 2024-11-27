@@ -1,8 +1,8 @@
 """Draw routes."""
-import sqlite3
 from flask import Blueprint, render_template, jsonify, session
 from routes.auth import login_required
 from database.db import get_db_connection
+from database.db import dict_cursor, dict_cursor_one
 
 draw_bp = Blueprint('draw', __name__)
 
@@ -12,8 +12,9 @@ def draw():
     """Draw route."""
     conn = get_db_connection()
     try:
-        artworks = conn.execute('''
-            SELECT 
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT TOP 5
                 a.art_id, 
                 a.art_title,
                 a.artist,
@@ -28,12 +29,14 @@ def draw():
             WHERE ur.rank > 0  -- Only get ranked artworks
             AND (s.is_won IS NULL OR s.is_won = 0)  -- Only get artworks not marked as won
             ORDER BY ur.rank
-            LIMIT 5  -- Get only top 5
-        ''', (session['user_id'], session['user_id'])).fetchall()
+        ''', (session['user_id'], session['user_id']))
+        
+        artworks = dict_cursor(cursor)
         return render_template('draw.html', artworks=artworks)
-    except sqlite3.Error as e:
+    except Exception as e:
         return f"Database error: {str(e)}", 500
     finally:
+        cursor.close()
         conn.close()
 
 @draw_bp.route('/get_next_artworks', methods=['GET'])
@@ -42,8 +45,9 @@ def get_next_artworks():
     """Get next artworks route."""
     conn = get_db_connection()
     try:
-        artworks = conn.execute('''
-            SELECT 
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT TOP 5
                 a.art_id, 
                 a.art_title,
                 a.artist,
@@ -58,18 +62,18 @@ def get_next_artworks():
             WHERE ur.rank > 0  -- Only get ranked artworks
             AND (s.is_won IS NULL OR s.is_won = 0)  -- Only get artworks not marked as won
             ORDER BY ur.rank
-            LIMIT 5  -- Get only top 5
-        ''', (session['user_id'], session['user_id'])).fetchall()
+        ''', (session['user_id'], session['user_id']))
 
-        artwork_list = [dict(artwork) for artwork in artworks]
+        artwork_list = dict_cursor(cursor)
 
         return jsonify({
             'success': True,
             'artworks': artwork_list
         })
-    except sqlite3.Error as e:
+    except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
+        cursor.close()
         conn.close()
 
 @draw_bp.route('/mark_won/<int:art_id>', methods=['POST'])
@@ -78,7 +82,8 @@ def mark_won(art_id):
     """Mark won route."""
     conn = get_db_connection()
     try:
-        artwork = conn.execute('''
+        cursor = conn.cursor()
+        cursor.execute('''
             SELECT 
                 a.art_id, 
                 a.art_title,
@@ -92,30 +97,39 @@ def mark_won(art_id):
             LEFT JOIN artwork_status s
                 ON a.art_id = s.art_id AND s.user_id = ?
             WHERE a.art_id = ?
-        ''', (session['user_id'], session['user_id'], art_id)).fetchone()
+        ''', (session['user_id'], session['user_id'], art_id))
+        
+        artwork = dict_cursor_one(cursor)
 
         if not artwork:
             return jsonify({'error': 'Artwork not found'}), 404
 
-        if artwork['is_won'] == 1:
+        if artwork.get('is_won') == 1:
             return jsonify({
                 'success': False,
                 'error': 'This artwork has already been marked as won'
             }), 400
 
-        conn.execute('''
-            INSERT OR REPLACE INTO artwork_status (user_id, art_id, is_won) 
-            VALUES (?, ?, 1)
+        cursor.execute('''
+            MERGE artwork_status AS target
+            USING (VALUES (?, ?, 1)) AS source (user_id, art_id, is_won)
+            ON target.user_id = source.user_id AND target.art_id = source.art_id
+            WHEN MATCHED THEN
+                UPDATE SET is_won = source.is_won
+            WHEN NOT MATCHED THEN
+                INSERT (user_id, art_id, is_won)
+                VALUES (source.user_id, source.art_id, source.is_won);
         ''', (session['user_id'], art_id))
 
         conn.commit()
 
         return jsonify({
             'success': True,
-            'artwork': dict(artwork)
+            'artwork': artwork
         })
-    except sqlite3.Error as e:
+    except Exception as e:
         conn.rollback()
         return jsonify({'error': str(e)}), 500
     finally:
+        cursor.close()
         conn.close()

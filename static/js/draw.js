@@ -149,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                             </span>
                                         </td>
                                         <td class="artist">${artwork.artist}</td>
+                                        <td class="price">${artwork.price.toLocaleString().replace(',', ' ')} kr</td>
                                         <td class="ranking">${artwork.user_ranking > 0 ? artwork.user_ranking : '-'}</td>
                                     `;
                                     tbody.appendChild(tr);
