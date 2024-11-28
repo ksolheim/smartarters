@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         .then(data => {
                             console.log('Received data:', data);
                             if (data.success && data.artworks.length > 0) {
-                                // Only update the top image if the removed artwork was the highest ranked
+                                // Update the top image only if the removed artwork was the highest ranked
                                 if (removedRanking === currentHighestRanking) {
                                     const topArtworkContainer = document.querySelector('.col-md-8.mx-auto.text-center');
                                     if (topArtworkContainer) {
@@ -142,63 +142,63 @@ document.addEventListener('DOMContentLoaded', function() {
                                             });
                                         }, 500);
                                     }
-                                    
-                                    // Update table rows
-                                    const tbody = document.querySelector('#artworkTable tbody');
-                                    tbody.innerHTML = '';
-                                    data.artworks.forEach(artwork => {
-                                        const tr = document.createElement('tr');
-                                        tr.innerHTML = `
-                                            <td class="art-id">${artwork.art_id}</td>
-                                            <td class="title">
-                                                <span style="cursor: pointer;" 
-                                                      data-bs-toggle="modal" 
-                                                      data-bs-target="#imageModal${artwork.art_id}">
-                                                    ${artwork.art_title}
-                                                </span>
-                                            </td>
-                                            <td class="artist">${artwork.artist}</td>
-                                            <td class="price">${artwork.price.toLocaleString().replace(',', ' ')} kr</td>
-                                            <td class="ranking">${artwork.user_ranking > 0 ? artwork.user_ranking : '-'}</td>
-                                        `;
-                                        tbody.appendChild(tr);
+                                }
+                                
+                                // Always update table rows, regardless of ranking
+                                const tbody = document.querySelector('#artworkTable tbody');
+                                tbody.innerHTML = '';
+                                data.artworks.forEach(artwork => {
+                                    const tr = document.createElement('tr');
+                                    tr.innerHTML = `
+                                        <td class="art-id">${artwork.art_id}</td>
+                                        <td class="title">
+                                            <span style="cursor: pointer;" 
+                                                  data-bs-toggle="modal" 
+                                                  data-bs-target="#imageModal${artwork.art_id}">
+                                                ${artwork.art_title}
+                                            </span>
+                                        </td>
+                                        <td class="artist">${artwork.artist}</td>
+                                        <td class="price">${artwork.price.toLocaleString().replace(',', ' ')} kr</td>
+                                        <td class="ranking">${artwork.user_ranking > 0 ? artwork.user_ranking : '-'}</td>
+                                    `;
+                                    tbody.appendChild(tr);
 
-                                        // Create or update the modal for this artwork
-                                        let modal = document.getElementById(`imageModal${artwork.art_id}`);
-                                        if (!modal) {
-                                            modal = document.createElement('div');
-                                            modal.id = `imageModal${artwork.art_id}`;
-                                            modal.className = 'modal fade';
-                                            modal.setAttribute('tabindex', '-1');
-                                            modal.setAttribute('aria-labelledby', `imageModalLabel${artwork.art_id}`);
-                                            modal.setAttribute('aria-hidden', 'true');
-                                            modal.innerHTML = `
-                                                <div class="modal-dialog modal-fullscreen">
-                                                    <div class="modal-content bg-dark">
-                                                        <div class="modal-body p-0 d-flex align-items-center justify-content-center" 
-                                                             style="min-height: 100vh;"
-                                                             data-bs-dismiss="modal">
-                                                            <div class="position-relative" style="max-height: 95vh; max-width: 95vw;">
-                                                                <button type="button" 
-                                                                        class="btn-close btn-close-white position-absolute top-0 end-0 m-3" 
-                                                                        data-bs-dismiss="modal" 
-                                                                        aria-label="Close"
-                                                                        style="z-index: 1050;">
-                                                                </button>
-                                                                <img src="/static/images/art/${artwork.art_id}.jpg"
-                                                                     class="img-fluid"
-                                                                     style="max-height: 95vh; max-width: 95vw; object-fit: contain;"
-                                                                     alt="${artwork.art_title}"
-                                                                     onclick="event.stopPropagation();">
-                                                            </div>
+                                    // Create or update the modal for this artwork
+                                    let modal = document.getElementById(`imageModal${artwork.art_id}`);
+                                    if (!modal) {
+                                        modal = document.createElement('div');
+                                        modal.id = `imageModal${artwork.art_id}`;
+                                        modal.className = 'modal fade';
+                                        modal.setAttribute('tabindex', '-1');
+                                        modal.setAttribute('aria-labelledby', `imageModalLabel${artwork.art_id}`);
+                                        modal.setAttribute('aria-hidden', 'true');
+                                        modal.innerHTML = `
+                                            <div class="modal-dialog modal-fullscreen">
+                                                <div class="modal-content bg-dark">
+                                                    <div class="modal-body p-0 d-flex align-items-center justify-content-center" 
+                                                         style="min-height: 100vh;"
+                                                         data-bs-dismiss="modal">
+                                                        <div class="position-relative" style="max-height: 95vh; max-width: 95vw;">
+                                                            <button type="button" 
+                                                                    class="btn-close btn-close-white position-absolute top-0 end-0 m-3" 
+                                                                    data-bs-dismiss="modal" 
+                                                                    aria-label="Close"
+                                                                    style="z-index: 1050;">
+                                                            </button>
+                                                            <img src="/static/images/art/${artwork.art_id}.jpg"
+                                                                 class="img-fluid"
+                                                                 style="max-height: 95vh; max-width: 95vw; object-fit: contain;"
+                                                                 alt="${artwork.art_title}"
+                                                                 onclick="event.stopPropagation();">
                                                         </div>
                                                     </div>
                                                 </div>
-                                            `;
-                                            document.body.appendChild(modal);
-                                        }
-                                    });
-                                }
+                                            </div>
+                                        `;
+                                        document.body.appendChild(modal);
+                                    }
+                                });
                             }
                         })
                         .catch(error => console.error('Error:', error));
