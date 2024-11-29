@@ -95,6 +95,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 );
                 
                 if (row) {
+                    // Find the current highest ranking before removing the row
+                    const allRankings = Array.from(table.querySelectorAll('tbody tr .ranking'))
+                        .map(cell => parseInt(cell.textContent))
+                        .filter(ranking => !isNaN(ranking));
+                    const currentHighestRanking = Math.min(...allRankings);
+                    
+                    // Get the ranking of the removed artwork
+                    const removedRanking = parseInt(row.querySelector('.ranking').textContent);
+                    
                     // Remove the row
                     row.remove();
                     
@@ -104,37 +113,38 @@ document.addEventListener('DOMContentLoaded', function() {
                         .then(data => {
                             console.log('Received data:', data);
                             if (data.success && data.artworks.length > 0) {
-                                console.log('First artwork:', data.artworks[0]);
-                                
-                                const topArtworkContainer = document.querySelector('.col-md-8.mx-auto.text-center');
-                                if (topArtworkContainer) {
-                                    // Get the elements we want to update
-                                    const rankingTitle = topArtworkContainer.querySelector('h1');
-                                    const artworkImage = topArtworkContainer.querySelector('img');
-                                    const artworkTitle = topArtworkContainer.querySelector('.card-title');
-                                    const artworkArtist = topArtworkContainer.querySelector('.card-text');
-                                    
-                                    // Fade only the image
-                                    artworkImage.style.transition = 'opacity 0.5s ease';
-                                    artworkImage.style.opacity = '0';
-                                    
-                                    setTimeout(() => {
-                                        // Update all content
-                                        rankingTitle.textContent = `Your #${data.artworks[0].user_ranking} Ranked Artwork`;
-                                        artworkImage.src = `/static/images/art/${data.artworks[0].art_id}.jpg`;
-                                        artworkImage.alt = data.artworks[0].art_title;
-                                        artworkImage.setAttribute('data-bs-target', `#imageModal${data.artworks[0].art_id}`);
-                                        artworkTitle.textContent = data.artworks[0].art_title;
-                                        artworkArtist.textContent = `By ${data.artworks[0].artist}`;
+                                // Update the top image only if the removed artwork was the highest ranked
+                                if (removedRanking === currentHighestRanking) {
+                                    const topArtworkContainer = document.querySelector('.col-md-8.mx-auto.text-center');
+                                    if (topArtworkContainer) {
+                                        // Get the elements we want to update
+                                        const rankingTitle = topArtworkContainer.querySelector('h1');
+                                        const artworkImage = topArtworkContainer.querySelector('img');
+                                        const artworkTitle = topArtworkContainer.querySelector('.card-title');
+                                        const artworkArtist = topArtworkContainer.querySelector('.card-text');
                                         
-                                        // Fade in only the image
-                                        requestAnimationFrame(() => {
-                                            artworkImage.style.opacity = '1';
-                                        });
-                                    }, 500);
+                                        // Fade only the image
+                                        artworkImage.style.transition = 'opacity 0.5s ease';
+                                        artworkImage.style.opacity = '0';
+                                        
+                                        setTimeout(() => {
+                                            // Update all content
+                                            rankingTitle.textContent = `Your #${data.artworks[0].user_ranking} Ranked Artwork`;
+                                            artworkImage.src = `/static/images/art/${data.artworks[0].art_id}.jpg`;
+                                            artworkImage.alt = data.artworks[0].art_title;
+                                            artworkImage.setAttribute('data-bs-target', `#imageModal${data.artworks[0].art_id}`);
+                                            artworkTitle.textContent = data.artworks[0].art_title;
+                                            artworkArtist.textContent = `By ${data.artworks[0].artist}`;
+                                            
+                                            // Fade in only the image
+                                            requestAnimationFrame(() => {
+                                                artworkImage.style.opacity = '1';
+                                            });
+                                        }, 500);
+                                    }
                                 }
                                 
-                                // Update table rows
+                                // Always update table rows, regardless of ranking
                                 const tbody = document.querySelector('#artworkTable tbody');
                                 tbody.innerHTML = '';
                                 data.artworks.forEach(artwork => {
